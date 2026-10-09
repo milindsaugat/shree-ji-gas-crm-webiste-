@@ -1,0 +1,22 @@
+Options -Indexes
+DirectoryIndex index.php
+RewriteEngine On
+RewriteRule ^(?:config|controllers|models|helpers|views|database|storage|scripts|tests|tmp|\.git|\.agents|\.codex)(?:/|$) - [F,L]
+RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L]
+RewriteRule ^(?:README\.md|.*\.sql|.*\.log|.*\.ini|.*\.env|\.env.*)$ - [F,L,NC]
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)/$ $1 [R=301,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+<IfModule mod_headers.c>
+ Header always set X-Content-Type-Options "nosniff"
+ Header always set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+<IfModule mod_expires.c>
+ ExpiresActive On
+ ExpiresByType text/css "access plus 30 days"
+ ExpiresByType application/javascript "access plus 30 days"
+ ExpiresByType image/webp "access plus 30 days"
+ ExpiresByType image/svg+xml "access plus 30 days"
+</IfModule>

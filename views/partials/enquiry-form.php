@@ -1,0 +1,12 @@
+<?php $formId=$formId??'contact'; ?>
+<form class="enquiry-form" action="<?= url('enquiry') ?>" method="post" x-data="{sending:false}">
+<?= csrfField() ?><div class="form-honeypot" aria-hidden="true" style="display:none !important;"><label>Security Check<input name="enquiry_pot_check" tabindex="-1" autocomplete="new-password"></label></div>
+<div class="form-row"><div><label for="<?= $formId ?>-name">Your name <span>*</span></label><input id="<?= $formId ?>-name" name="name" autocomplete="name" placeholder="Full name" required minlength="2" maxlength="150"></div><div><label for="<?= $formId ?>-phone">Phone number <span>*</span></label><input id="<?= $formId ?>-phone" name="phone" type="tel" autocomplete="tel" placeholder="+91" required pattern="[+0-9\s()-]{8,25}" maxlength="25"></div></div>
+<div class="form-row"><div><label for="<?= $formId ?>-email">Email address <small>(optional)</small></label><input id="<?= $formId ?>-email" name="email" type="email" autocomplete="email" placeholder="you@organisation.com" maxlength="254"></div><div><label for="<?= $formId ?>-product">I’m interested in</label><select id="<?= $formId ?>-product" name="product"><option value="">Select a product</option><?php foreach((new ContentModel('products'))->all(true) as $p): ?><option <?= ($_GET['product']??'')===$p['name']?'selected':'' ?> value="<?= e($p['name']) ?>"><?= e($p['name']) ?></option><?php endforeach ?><option>General enquiry</option></select></div></div>
+<label for="<?= $formId ?>-message">How can we help? <span>*</span></label><textarea id="<?= $formId ?>-message" name="message" rows="4" required minlength="10" maxlength="5000" placeholder="Tell us about your equipment, quantity or application requirements…"></textarea>
+<label class="checkbox-label consent-checkbox">
+    <input type="checkbox" name="consent" value="1" required>
+    <span>I consent to Shree Ji Gas Industries collecting and processing my contact details and equipment requirements in accordance with applicable Data Protection (DPDP) regulations and privacy guidelines. <small style="color:var(--color-secondary);font-weight:700;">*</small></span>
+</label>
+<div class="form-status" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit" :disabled="sending"><span class="btn-text">Send enquiry <?= icon('arrow-right-up-line') ?></span></button><p class="form-note">By sending, you agree to our <a href="<?= url('privacy') ?>">privacy policy</a>. Your details are used solely to respond to your enquiry.</p>
+</form>
