@@ -6158,33 +6158,37 @@ dialog.media-picker::backdrop {
   margin-top: 22px;
 }
 
-/* Code editor textarea for GTM and tracking scripts */
+/* Code editor textarea for GTM and tracking scripts (Clean Light Theme) */
 .code-editor-textarea {
   width: 100%;
   font-family: 'SFMono-Regular', Consolas, Monaco, ui-monospace, monospace !important;
   font-size: 13px !important;
   line-height: 1.55 !important;
-  letter-spacing: 0.2px;
   tab-size: 2;
   white-space: pre;
   word-break: normal;
   overflow-x: auto;
-  background: #0f172a !important;
-  color: #38bdf8 !important;
-  border: 1px solid #334155 !important;
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
   border-radius: 8px !important;
   padding: 12px 14px !important;
   box-sizing: border-box;
   resize: vertical;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: all 0.15s ease;
+}
+.code-editor-textarea:hover {
+  background: #ffffff !important;
+  border-color: #94a3b8 !important;
 }
 .code-editor-textarea::placeholder {
-  color: #64748b !important;
-  opacity: 0.8;
+  color: #94a3b8 !important;
+  opacity: 1;
 }
 .code-editor-textarea:focus {
-  border-color: #38bdf8 !important;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+  background: #ffffff !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12) !important;
   outline: none !important;
 }
 
