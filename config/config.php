@@ -37,6 +37,15 @@ if ($isHostinger) {
 
 // 3. Optional local.php overrides (if present)
 $local = is_file(__DIR__ . '/local.php') ? require __DIR__ . '/local.php' : [];
+if (!is_array($local)) $local = [];
+
+// If on Hostinger, never allow accidental local XAMPP credentials from uploaded local.php to override production
+if ($isHostinger) {
+    if (($local['DB_USER'] ?? '') === 'root' || ($local['DB_NAME'] ?? '') === 'shreejigas') {
+        unset($local['DB_DRIVER'], $local['DB_HOST'], $local['DB_PORT'], $local['DB_NAME'], $local['DB_USER'], $local['DB_PASS'], $local['APP_BASE_PATH'], $local['APP_URL']);
+    }
+}
+
 $option = static fn(string $name, mixed $default = ''): mixed => getenv($name) !== false ? getenv($name) : ($local[$name] ?? $default);
 
 define('DB_DRIVER', (string)$option('DB_DRIVER', $defaultDbDriver));

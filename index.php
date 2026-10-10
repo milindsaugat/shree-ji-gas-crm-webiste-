@@ -13,6 +13,33 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 header('X-Frame-Options: SAMEORIGIN');
 spl_autoload_register(function (string $class): void { foreach (['config','helpers','models','controllers','controllers/Admin'] as $dir) { $file = ROOT . '/' . $dir . '/' . $class . '.php'; if (is_file($file)) { require $file; return; } } });
 require ROOT . '/helpers/functions.php';
+
+if (isset($_GET['db_test'])) {
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "=== Shree Ji Gas Industries Database Diagnostics ===\n";
+    echo "PHP Version: " . PHP_VERSION . "\n";
+    echo "HTTP Host: " . ($_SERVER['HTTP_HOST'] ?? 'cli') . "\n";
+    echo "DB Driver: " . DB_DRIVER . "\n";
+    echo "DB Host: " . DB_HOST . "\n";
+    echo "DB Port: " . DB_PORT . "\n";
+    echo "DB Name: " . DB_NAME . "\n";
+    echo "DB User: " . DB_USER . "\n";
+    echo "Base Path: [" . BASE_PATH . "]\n";
+    echo "App URL: " . SITE_URL . "\n";
+    echo "Testing Connection...\n";
+    try {
+        $db = Database::get();
+        echo "STATUS: SUCCESS - Connected to database successfully!\n";
+        $tables = $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+        echo "Tables in database (" . count($tables) . "): " . implode(', ', $tables) . "\n";
+    } catch (Throwable $e) {
+        echo "STATUS: FAILED\n";
+        echo "Error message: " . $e->getMessage() . "\n";
+        echo "Error code: " . $e->getCode() . "\n";
+    }
+    exit;
+}
+
 $path = rawurldecode(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH));
 if (BASE_PATH && str_starts_with($path, BASE_PATH)) $path = substr($path, strlen(BASE_PATH));
 $path = trim($path, '/');

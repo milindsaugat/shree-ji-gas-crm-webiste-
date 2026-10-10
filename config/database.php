@@ -8,21 +8,34 @@ final class Database
     {
         if (self::$connection) return self::$connection;
         if (DB_DRIVER === 'mysql') {
-            $dsn = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=utf8mb4';
-            try {
-                self::$connection = new PDO($dsn, DB_USER, DB_PASS, self::options());
-            } catch (PDOException $e) {
-                // If custom/Hostinger credentials fail on local development with access denied (1045) or unknown database, attempt local XAMPP root fallback
-                if (($e->getCode() === 1045 || str_contains($e->getMessage(), 'Access denied') || str_contains($e->getMessage(), 'Unknown database')) && (DB_USER !== 'root' || DB_PASS !== '')) {
-                    try {
-                        $localDsn = 'mysql:host=127.0.0.1;port=3306;dbname=shreejigas;charset=utf8mb4';
-                        self::$connection = new PDO($localDsn, 'root', '', self::options());
-                    } catch (Throwable) {
-                        throw $e;
-                    }
-                } else {
-                    throw $e;
+            $hosts = [DB_HOST];
+            if (DB_HOST === 'localhost') {
+                $hosts[] = '127.0.0.1';
+            } elseif (DB_HOST === '127.0.0.1') {
+                $hosts[] = 'localhost';
+            }
+            $lastException = null;
+            foreach ($hosts as $host) {
+                $dsn = 'mysql:host=' . $host . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=utf8mb4';
+                try {
+                    self::$connection = new PDO($dsn, DB_USER, DB_PASS, self::options());
+                    return self::$connection;
+                } catch (PDOException $e) {
+                    $lastException = $e;
                 }
+            }
+            // If custom/Hostinger credentials fail on local development with access denied (1045) or unknown database, attempt local XAMPP root fallback
+            if ($lastException && ($lastException->getCode() === 1045 || str_contains($lastException->getMessage(), 'Access denied') || str_contains($lastException->getMessage(), 'Unknown database')) && (DB_USER !== 'root' || DB_PASS !== '')) {
+                try {
+                    $localDsn = 'mysql:host=127.0.0.1;port=3306;dbname=shreejigas;charset=utf8mb4';
+                    self::$connection = new PDO($localDsn, 'root', '', self::options());
+                    return self::$connection;
+                } catch (Throwable) {
+                    throw $lastException;
+                }
+            }
+            if ($lastException) {
+                throw $lastException;
             }
         } else {
             if (!is_dir(ROOT . '/storage')) mkdir(ROOT . '/storage', 0750, true);
