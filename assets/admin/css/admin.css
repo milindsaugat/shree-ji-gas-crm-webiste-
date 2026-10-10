@@ -147,6 +147,18 @@
 .auth-form .password-input-wrap .btn-toggle-pass:hover {
   color: var(--color-primary);
 }
+#resetOtp {
+  text-align: center;
+  font-size: 14px;
+  letter-spacing: normal;
+  transition: all 0.2s ease;
+}
+#resetOtp:focus,
+#resetOtp:not(:placeholder-shown) {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 6px;
+}
 .auth-form .btn {
   margin-top: 18px;
   padding: 14px 20px;
