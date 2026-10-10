@@ -120,6 +120,33 @@
   color: var(--color-text-muted);
   margin-bottom: 6px;
 }
+.auth-form .password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.auth-form .password-input-wrap input {
+  width: 100%;
+  padding-right: 44px;
+}
+.auth-form .password-input-wrap .btn-toggle-pass {
+  position: absolute;
+  right: 6px;
+  background: transparent;
+  border: none;
+  padding: 8px;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+}
+.auth-form .password-input-wrap .btn-toggle-pass:hover {
+  color: var(--color-primary);
+}
 .auth-form .btn {
   margin-top: 18px;
   padding: 14px 20px;

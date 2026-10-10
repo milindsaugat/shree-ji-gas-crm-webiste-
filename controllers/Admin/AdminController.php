@@ -40,24 +40,143 @@ final class AdminController
         }
         $this->render('login',['title'=>$setup?'Create admin account':'Welcome back','error'=>$error,'setup'=>$setup&&!$hasAdmin&&$canSetup,'hasAdmin'=>$hasAdmin,'canSetup'=>$canSetup]);
     }
-    private function resetPassword(string $path):void {
-        if(Auth::user()) { redirect('admin'); }
-        $error=''; $notice=''; $token=trim((string)($_GET['token']??$_POST['token']??''));
-        if($path==='admin/forgot') {
-            if($_SERVER['REQUEST_METHOD']==='POST') { checkCsrf(); $identifier=trim((string)($_POST['identifier']??''));
-                if(!RateLimit::allow('password-reset',5,900)) $error='Too many requests. Try again in 15 minutes.';
-                elseif($identifier==='') $error='Enter your username or email address.';
-                else { $admin=Auth::findByIdentifier($identifier); if($admin) { $rawToken=bin2hex(random_bytes(32)); $otp=(string)random_int(100000,999999); Database::get()->prepare('DELETE FROM password_resets WHERE admin_id = ?')->execute([$admin['id']]); Database::get()->prepare('INSERT INTO password_resets (admin_id,token_hash,otp_hash,expires_at) VALUES (?,?,?,?)')->execute([$admin['id'],hash('sha256',$rawToken),password_hash($otp,PASSWORD_DEFAULT),date('Y-m-d H:i:s',time()+OTP_EXPIRY_MINUTES*60)]); $link=url('admin/reset').'?token='.rawurlencode($rawToken); try { $tpl=EmailTemplate::otp($admin['name']??'Administrator',$otp,'You requested a password reset for your Shree Ji Gas admin account. Your one-time verification code is below.',$link); SmtpMailer::send($admin['email'],$tpl['subject'],$tpl['plain'],$tpl['html']); $notice='If an account matches those details, a verification code has been sent to its email address.'; } catch(Throwable $e) { $error=$e->getMessage(); } } else $notice='If an account matches those details, a verification code has been sent to its email address.'; }
+    private function resetPassword(string $path): void {
+        if (Auth::user()) { redirect('admin'); }
+        $error = '';
+        $notice = '';
+        $token = trim((string)($_GET['token'] ?? $_POST['token'] ?? ($_SESSION['reset_flow']['token'] ?? '')));
+
+        if ($path === 'admin/forgot') {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                checkCsrf();
+                $email = trim((string)($_POST['email'] ?? $_POST['identifier'] ?? ''));
+                if (!RateLimit::allow('password-reset', 5, 900)) {
+                    $error = 'Too many password reset requests. Please wait 15 minutes before trying again.';
+                } elseif ($email === '') {
+                    $error = 'Please enter your registered administrator email address.';
+                } else {
+                    $admin = Auth::findByIdentifier($email);
+                    if (!$admin) {
+                        $error = 'No administrator account found with this email address (' . htmlspecialchars($email) . ').';
+                    } else {
+                        $rawToken = bin2hex(random_bytes(32));
+                        $otp = (string)random_int(100000, 999999);
+                        Database::get()->prepare('DELETE FROM password_resets WHERE admin_id = ?')->execute([$admin['id']]);
+                        Database::get()->prepare('INSERT INTO password_resets (admin_id, token_hash, otp_hash, expires_at) VALUES (?, ?, ?, ?)')
+                            ->execute([$admin['id'], hash('sha256', $rawToken), password_hash($otp, PASSWORD_DEFAULT), date('Y-m-d H:i:s', time() + 600)]);
+
+                        $link = url('admin/reset') . '?token=' . rawurlencode($rawToken);
+                        try {
+                            $tpl = EmailTemplate::otp(
+                                $admin['name'] ?? 'Administrator',
+                                $otp,
+                                'You requested a password reset for your Shree Ji Gas admin workspace. Your 6-digit one-time verification code is below.',
+                                $link
+                            );
+                            SmtpMailer::send($admin['email'], $tpl['subject'], $tpl['plain'], $tpl['html']);
+                        } catch (Throwable $e) {
+                            @file_put_contents(ROOT . '/storage/logs/mail.log', '[' . date('Y-m-d H:i:s') . '] Password reset OTP for ' . $admin['email'] . ': ' . $otp . ' | ' . $e->getMessage() . "\n", FILE_APPEND);
+                        }
+
+                        $_SESSION['reset_flow'] = [
+                            'token' => $rawToken,
+                            'email' => $admin['email'],
+                            'verified' => false
+                        ];
+
+                        redirect('admin/reset?token=' . rawurlencode($rawToken));
+                    }
+                }
             }
-            $this->render('forgot',['title'=>'Forgot password','error'=>$error,'notice'=>$notice]); return;
+            $this->render('forgot', ['title' => 'Forgot password', 'error' => $error, 'notice' => $notice]);
+            return;
         }
-        $row=null; if($token!=='') { $stmt=Database::get()->prepare('SELECT * FROM password_resets WHERE token_hash=? AND used_at IS NULL AND expires_at > ?');$stmt->execute([hash('sha256',$token),date('Y-m-d H:i:s')]);$row=$stmt->fetch()?:null; }
-        if(!$row) $error='This reset link is invalid or has expired. Request a new code.';
-        elseif($_SERVER['REQUEST_METHOD']==='POST') { checkCsrf(); $otp=trim((string)($_POST['otp']??''));$password=(string)($_POST['password']??'');$confirm=(string)($_POST['confirm_password']??'');
-            if((int)$row['attempts']>=5) $error='Too many incorrect codes. Request a new code.';
-            else { Database::get()->prepare('UPDATE password_resets SET attempts=attempts+1 WHERE id=?')->execute([$row['id']]); if(!preg_match('/^\d{6}$/',$otp)||!password_verify($otp,$row['otp_hash']))$error='The verification code is incorrect.'; elseif(strlen($password)<12||strlen($password)>72||$password!==$confirm)$error='Use 12–72 characters and make sure both passwords match.'; else { Database::get()->prepare('UPDATE admin_users SET password_hash=? WHERE id=?')->execute([password_hash($password,PASSWORD_BCRYPT),$row['admin_id']]);Database::get()->prepare('UPDATE password_resets SET used_at=? WHERE id=?')->execute([date('Y-m-d H:i:s'),$row['id']]);flash('Password reset complete. You can sign in now.');redirect('admin/login'); } }
+
+        // admin/reset handler
+        $row = null;
+        if ($token !== '') {
+            $stmt = Database::get()->prepare('SELECT * FROM password_resets WHERE token_hash = ? AND used_at IS NULL AND expires_at > ?');
+            $stmt->execute([hash('sha256', $token), date('Y-m-d H:i:s')]);
+            $row = $stmt->fetch() ?: null;
         }
-        $this->render('reset',['title'=>'Reset password','error'=>$error,'token'=>$token,'valid'=>(bool)$row]);
+
+        $sessionFlow = $_SESSION['reset_flow'] ?? [];
+        $targetEmail = $sessionFlow['email'] ?? '';
+        if (!$targetEmail && $row) {
+            $stmt = Database::get()->prepare('SELECT email FROM admin_users WHERE id = ?');
+            $stmt->execute([$row['admin_id']]);
+            $targetEmail = (string)($stmt->fetchColumn() ?: '');
+        }
+
+        $verified = !empty($sessionFlow['verified']) && (($sessionFlow['token'] ?? '') === $token);
+
+        if (!$row) {
+            $error = 'This reset session is invalid or has expired. Please request a new 6-digit code.';
+            $this->render('reset', [
+                'title' => 'Reset password',
+                'error' => $error,
+                'token' => '',
+                'valid' => false,
+                'verified' => false,
+                'targetEmail' => $targetEmail
+            ]);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            checkCsrf();
+            $action = trim((string)($_POST['action'] ?? ''));
+
+            if ($action === 'verify_otp' || isset($_POST['otp'])) {
+                // Step 2: Verify 6-digit OTP
+                $otp = trim((string)($_POST['otp'] ?? ''));
+                if ((int)$row['attempts'] >= 5) {
+                    $error = 'Too many incorrect attempts. Please request a new verification code.';
+                } elseif (!preg_match('/^\d{6}$/', $otp)) {
+                    $error = 'Please enter a valid 6-digit numeric verification code.';
+                } else {
+                    Database::get()->prepare('UPDATE password_resets SET attempts = attempts + 1 WHERE id = ?')->execute([$row['id']]);
+                    if (!password_verify($otp, $row['otp_hash'])) {
+                        $error = 'The verification code is incorrect. Please check your email and try again.';
+                    } else {
+                        $_SESSION['reset_flow']['verified'] = true;
+                        $_SESSION['reset_flow']['token'] = $token;
+                        $verified = true;
+                    }
+                }
+            } elseif ($action === 'set_password' || isset($_POST['password'])) {
+                // Step 3: Choose new password
+                if (!$verified) {
+                    $error = 'Please verify your 6-digit code before choosing a new password.';
+                } else {
+                    $password = (string)($_POST['password'] ?? '');
+                    $confirm = (string)($_POST['confirm_password'] ?? '');
+                    if (strlen($password) < 12 || strlen($password) > 72) {
+                        $error = 'Password must be between 12 and 72 characters.';
+                    } elseif ($password !== $confirm) {
+                        $error = 'Passwords do not match. Please ensure both passwords match.';
+                    } else {
+                        Database::get()->prepare('UPDATE admin_users SET password_hash = ? WHERE id = ?')
+                            ->execute([password_hash($password, PASSWORD_BCRYPT), $row['admin_id']]);
+                        Database::get()->prepare('UPDATE password_resets SET used_at = ? WHERE id = ?')
+                            ->execute([date('Y-m-d H:i:s'), $row['id']]);
+                        unset($_SESSION['reset_flow']);
+                        session_regenerate_id(true);
+                        flash('Password updated successfully! Sign in with your new password.');
+                        redirect('admin/login');
+                    }
+                }
+            }
+        }
+
+        $this->render('reset', [
+            'title' => 'Reset password',
+            'error' => $error,
+            'token' => $token,
+            'valid' => (bool)$row,
+            'verified' => $verified,
+            'targetEmail' => $targetEmail
+        ]);
     }
     private function dashboard():void {
         $tables=['products','blog_posts','enquiries','media','categories','testimonials'];
