@@ -12,10 +12,11 @@ final class Database
             try {
                 self::$connection = new PDO($dsn, DB_USER, DB_PASS, self::options());
             } catch (PDOException $e) {
-                // If custom credentials fail on local development with access denied (1045), attempt root fallback
-                if ($e->getCode() === 1045 && (DB_USER !== 'root' || DB_PASS !== '')) {
+                // If custom/Hostinger credentials fail on local development with access denied (1045) or unknown database, attempt local XAMPP root fallback
+                if (($e->getCode() === 1045 || str_contains($e->getMessage(), 'Access denied') || str_contains($e->getMessage(), 'Unknown database')) && (DB_USER !== 'root' || DB_PASS !== '')) {
                     try {
-                        self::$connection = new PDO($dsn, 'root', '', self::options());
+                        $localDsn = 'mysql:host=127.0.0.1;port=3306;dbname=shreejigas;charset=utf8mb4';
+                        self::$connection = new PDO($localDsn, 'root', '', self::options());
                     } catch (Throwable) {
                         throw $e;
                     }
