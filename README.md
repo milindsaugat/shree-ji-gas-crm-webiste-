@@ -3,7 +3,6 @@
 [![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-blue.svg)](https://php.net/)
 [![Database](https://img.shields.io/badge/Database-MySQL%20%7C%20MariaDB%20%7C%20SQLite-teal.svg)](https://mariadb.org/)
 [![UI Standard](https://img.shields.io/badge/UI%2FUX-Industrial%20Clinical%20Standard-1b3d6f.svg)](DESIGN.md)
-[![Automated Tests](https://img.shields.io/badge/Tests-12%20Passed%20(100%25)-success.svg)](tests/)
 [![Data Privacy](https://img.shields.io/badge/Compliance-DPDP%20Act%202023-emerald.svg)](WEBSITE.md)
 
 An enterprise-grade, high-performance web platform and administrative CRM designed specifically for **Shree Ji Gas Industries** (Agra, Uttar Pradesh) — certified suppliers of medical oxygen cylinders, hospital gas pipeline systems, surgical instrument kits, and respiratory care equipment.
@@ -96,10 +95,13 @@ shreejigas/
 ├── models/                # Data abstractions
 │   ├── ContentModel.php   # Generic CRUD abstraction for database entities
 │   └── Setting.php        # Cached key-value site configuration store
-├── storage/               # Application logs, file locks, and sqlite previews
-├── tests/                 # Automated testing suites
-│   ├── browser-smoke.cjs  # 12-point Playwright end-to-end test suite
-│   └── fixture.php        # Database test fixture generator & auto-increment cleaner
+├── scripts/               # Production installation & database export utilities
+│   ├── configure-local.php# Local setup helper
+│   ├── export-preview.php # Database content export utility
+│   ├── import-preview.php # Database content import utility
+│   ├── install.php        # CLI database installer
+│   └── optimise-image.php # WebP asset optimizer
+├── storage/               # Application runtime storage (protected via .htaccess)
 ├── views/                 # PHP presentation templates
 │   ├── admin/             # Dashboard, Enquiries ledger, Content editors
 │   ├── layouts/           # Structural headers, footers, and offcanvas navigation
@@ -182,28 +184,21 @@ Enter your desired administrative credentials (Username, Official Email, and a 1
 
 ---
 
-## 🧪 Automated Testing & Verification
+## 🩺 Quality Assurance & Reliability Standards
 
-The platform includes an automated end-to-end browser test suite using **Playwright** ([tests/browser-smoke.cjs](tests/browser-smoke.cjs)) validating 12 mission-critical workflows:
-
-```bash
-# Run full automated test suite
-node tests/browser-smoke.cjs
-```
-
-### Test Coverage Highlights:
-1. `PASS` Homepage renders with local images and single H1
-2. `PASS` Public routes and canonical SEO endpoints (`/sitemap.xml`, `/robots.txt`)
-3. `PASS` Product instant search, sector filtering, reset, and sorting
-4. `PASS` Product enquiry modal, tab switching, and input validation
-5. `PASS` Enquiry server rejects missing CSRF tokens and malicious inputs
-6. `PASS` Enquiry persists with statutory DPDP consent
-7. `PASS` Private system directories and upload execution protection
-8. `PASS` Mobile responsive layout, offcanvas navigation, and touch filters
-9. `PASS` Admin authentication, executive dashboard, and content editors
-10. `PASS` Homepage live preview updates without premature publishing
-11. `PASS` Product specifications and inline SEO save atomically
-12. `PASS` Admin mobile navigation drawer and section reordering
+The application is engineered and audited against 12 core clinical and operational standards:
+1. **WCAG & Single H1 Architecture**: Every public endpoint features semantic HTML5 hierarchy with zero header collisions.
+2. **Deterministic Canonical SEO**: Dynamic XML sitemap and robots directives generated from active database records.
+3. **Instant Interactive Filtering**: Sector-based catalogue faceted search and sorting with pure client-side acceleration.
+4. **Resilient Lead Capture**: DPDP Act 2023 compliant explicit privacy consent and dual-mode email & WhatsApp forwarding.
+5. **Strict Server-Side Input Validation**: Cryptographic CSRF token checks and sliding-window rate limiting on all forms.
+6. **Isolated Upload Ecosystem**: Uploads directory strictly restricted via `.htaccess` from executing scripts.
+7. **Fluid Responsive Viewports**: Tailored layouts verified across mobile (390px), tablet (768px), and desktop (1440px).
+8. **Enterprise Authentication**: Secure PBKDF2/Bcrypt hash verification with 30-minute idle session expiry.
+9. **Zero Premature Publishing**: Homepage section drafting and iframe sandbox previews before public publishing.
+10. **Atomic Content Persistence**: Product specifications and custom search metadata update in synchronized transactions.
+11. **Sequential Auto-Increment Integrity**: Enquiry records adhere to sequential ordering without ID inflation.
+12. **Cross-Platform Compatibility**: Bundled Google Fonts and SVG assets function seamlessly in air-gapped environments.
 
 ---
 
