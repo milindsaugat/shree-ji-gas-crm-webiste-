@@ -804,20 +804,33 @@ final class AdminController
         if ($path === 'admin/settings/test-smtp' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             checkCsrf();
             try {
-                $testTo = trim((string)($_POST['test_to'] ?? Auth::user()['email']));
+                $testTo = trim((string)($_POST['test_to'] ?? (Auth::user()['email'] ?? 'shreejigasteam@gmail.com')));
                 if (!filter_var($testTo, FILTER_VALIDATE_EMAIL)) throw new RuntimeException('Enter a valid recipient email address.');
-                if (isset($_POST['smtp_host']) && $_POST['smtp_host'] !== '') Setting::save('smtp_host', trim((string)$_POST['smtp_host']));
-                if (isset($_POST['smtp_port']) && $_POST['smtp_port'] !== '') Setting::save('smtp_port', trim((string)$_POST['smtp_port']));
-                if (isset($_POST['smtp_user']) && $_POST['smtp_user'] !== '') Setting::save('smtp_user', trim((string)$_POST['smtp_user']));
-                if (isset($_POST['smtp_pass']) && $_POST['smtp_pass'] !== '') Setting::save('smtp_pass', (string)$_POST['smtp_pass']);
-                if (isset($_POST['smtp_from_email']) && $_POST['smtp_from_email'] !== '') Setting::save('smtp_from_email', trim((string)$_POST['smtp_from_email']));
-                if (isset($_POST['smtp_from_name']) && $_POST['smtp_from_name'] !== '') Setting::save('smtp_from_name', trim((string)$_POST['smtp_from_name']));
-                if (isset($_POST['smtp_enabled'])) Setting::save('smtp_enabled', $_POST['smtp_enabled'] ? '1' : '0');
-                if (isset($_POST['smtp_encryption']) && $_POST['smtp_encryption'] !== '') Setting::save('smtp_encryption', trim((string)$_POST['smtp_encryption']));
+                
+                $host = trim((string)($_POST['smtp_host'] ?? setting('smtp_host', 'smtp.gmail.com')));
+                $port = trim((string)($_POST['smtp_port'] ?? setting('smtp_port', '587')));
+                $user = trim((string)($_POST['smtp_user'] ?? setting('smtp_user', '')));
+                $pass = (string)($_POST['smtp_pass'] ?? setting('smtp_pass', ''));
+                $encryption = trim((string)($_POST['smtp_encryption'] ?? setting('smtp_encryption', 'tls')));
+                $fromEmail = trim((string)($_POST['smtp_from_email'] ?? setting('smtp_from_email', 'shreejigasteam@gmail.com')));
+                $fromName = trim((string)($_POST['smtp_from_name'] ?? setting('smtp_from_name', SITE_NAME)));
+
+                if (!$user || !$pass) {
+                    throw new RuntimeException('Please enter SMTP Username (email) and Password / App Password to test.');
+                }
+
+                Setting::save('smtp_host', $host ?: 'smtp.gmail.com');
+                Setting::save('smtp_port', $port ?: '587');
+                Setting::save('smtp_user', $user);
+                Setting::save('smtp_pass', $pass);
+                Setting::save('smtp_encryption', $encryption ?: 'tls');
+                Setting::save('smtp_from_email', $fromEmail ?: $user);
+                Setting::save('smtp_from_name', $fromName ?: SITE_NAME);
+                Setting::save('smtp_enabled', '1');
 
                 $tpl = EmailTemplate::test($testTo, date('d M Y, h:i:s A') . ' IST');
                 SmtpMailer::send($testTo, $tpl['subject'], $tpl['plain'], $tpl['html']);
-                jsonResponse(['ok' => true, 'message' => 'SMTP test email sent successfully to ' . $testTo . '!']);
+                jsonResponse(['ok' => true, 'message' => 'SMTP test email sent successfully to ' . $testTo . '! Gateway is live and verified.']);
             } catch (Throwable $e) {
                 jsonResponse(['ok' => false, 'message' => $e->getMessage()], 422);
             }
@@ -834,6 +847,10 @@ final class AdminController
         $error = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') try {
             foreach ($fields as $key) {
+                if ($key === 'smtp_enabled') {
+                    Setting::save('smtp_enabled', !empty($_POST['smtp_enabled']) ? '1' : '0');
+                    continue;
+                }
                 $value = trim((string)($_POST[$key] ?? ''));
                 if (in_array($key, ['logo', 'catalogue_pdf'])) $this->validateAsset($value);
                 if (in_array($key, ['facebook', 'instagram', 'linkedin'])) $this->validateUrl($value);

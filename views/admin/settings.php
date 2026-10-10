@@ -198,8 +198,8 @@ $user = Auth::user();
       <div class="settings-grid-3">
         <div class="admin-field">
           <label for="smtpHost">SMTP Host / Server <span>*</span></label>
-          <input type="text" id="smtpHost" name="smtp_host" value="<?= e(setting('smtp_host')) ?>" placeholder="smtp.gmail.com or mail.shreejigas.com">
-          <small class="field-hint">e.g. <code>smtp.gmail.com</code> (Google Workspace) or <code>smtp.hostinger.com</code></small>
+          <input type="text" id="smtpHost" name="smtp_host" value="<?= e(setting('smtp_host', 'smtp.gmail.com')) ?>" placeholder="smtp.gmail.com">
+          <small class="field-hint">e.g. <code>smtp.gmail.com</code> (Google Workspace / Gmail) or <code>smtp.hostinger.com</code></small>
         </div>
 
         <div class="admin-field">
@@ -223,7 +223,7 @@ $user = Auth::user();
       <div class="settings-grid-2">
         <div class="admin-field">
           <label for="smtpUser">SMTP Username / Login Account</label>
-          <input type="text" id="smtpUser" name="smtp_user" value="<?= e(setting('smtp_user')) ?>" placeholder="e.g. alerts@shreejigas.com or your Gmail address">
+          <input type="text" id="smtpUser" name="smtp_user" value="<?= e(setting('smtp_user')) ?>" placeholder="e.g. shreejigasteam@gmail.com">
           <small class="field-hint">For Gmail with 2FA, use a 16-character Google App Password.</small>
         </div>
 
@@ -242,7 +242,7 @@ $user = Auth::user();
       <div class="settings-grid-2">
         <div class="admin-field">
           <label for="smtpFromEmail">From Email Address <span>*</span></label>
-          <input type="email" id="smtpFromEmail" name="smtp_from_email" value="<?= e(setting('smtp_from_email')) ?>" placeholder="no-reply@shreejigas.com">
+          <input type="email" id="smtpFromEmail" name="smtp_from_email" value="<?= e(setting('smtp_from_email', 'shreejigasteam@gmail.com')) ?>" placeholder="shreejigasteam@gmail.com">
           <small class="field-hint">The email address that recipients will see in their inbox header.</small>
         </div>
 
@@ -266,7 +266,7 @@ $user = Auth::user();
         <div class="smtp-test-controls">
           <div class="smtp-test-input-wrap">
             <label for="smtpTestRecipient">Send Test Email To:</label>
-            <input type="email" id="smtpTestRecipient" value="<?= e($user['email'] ?? 'admin@shreejigas.com') ?>" placeholder="your-email@example.com">
+            <input type="email" id="smtpTestRecipient" value="<?= e($user['email'] ?? 'shreejigasteam@gmail.com') ?>" placeholder="shreejigasteam@gmail.com">
           </div>
           <button type="button" class="btn btn-primary" id="btnRunSmtpTest">
             <?= icon('mail-send-line') ?> <span>Send Test Email</span>
@@ -359,7 +359,7 @@ $user = Auth::user();
       </div>
       <div class="profile-meta-item">
         <span class="meta-label">Current Verified Email</span>
-        <strong class="meta-value" id="currentAdminEmailDisplay"><?= e($user['email'] ?? 'admin@shreejigas.com') ?></strong>
+        <strong class="meta-value" id="currentAdminEmailDisplay"><?= e($user['email'] ?? 'shreejigasteam@gmail.com') ?></strong>
       </div>
       <div class="profile-meta-item">
         <span class="meta-label">Session Security</span>
@@ -385,7 +385,7 @@ $user = Auth::user();
       <div id="emailChangeStep1" class="email-step-panel">
         <div class="admin-field">
           <label for="newAdminEmail">New Admin Email Address <span>*</span></label>
-          <input type="email" id="newAdminEmail" placeholder="e.g. director@shreejigas.com" required autocomplete="email">
+          <input type="email" id="newAdminEmail" placeholder="e.g. shreejigasteam@gmail.com" required autocomplete="email">
           <small class="field-hint">A 6-digit verification code will be dispatched to this address.</small>
         </div>
 
