@@ -70,3 +70,4 @@ $autoScriptPath = ($script === '/' || $script === '.' || $script === '') ? '' : 
 define('BASE_PATH', rtrim((string)$option('APP_BASE_PATH', $isHostinger ? $autoScriptPath : ($defaultBasePath ?: $autoScriptPath)), '/'));
 define('SITE_URL', rtrim((string)$option('APP_URL', $defaultAppUrl), '/'));
 date_default_timezone_set('Asia/Kolkata');
+require_once __DIR__ . '/database.php';
