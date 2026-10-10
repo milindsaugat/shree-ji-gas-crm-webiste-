@@ -824,7 +824,7 @@ final class AdminController
         }
 
         $fields = [
-            'phone', 'email', 'alert_email', 'address', 'whatsapp', 'tagline', 'description',
+            'phone', 'email', 'address', 'whatsapp', 'tagline', 'description',
             'operating_hours', 'gst_number',
             'logo', 'catalogue_pdf',
             'smtp_enabled', 'smtp_host', 'smtp_port', 'smtp_encryption', 'smtp_user', 'smtp_pass', 'smtp_from_email', 'smtp_from_name',
@@ -837,7 +837,7 @@ final class AdminController
                 $value = trim((string)($_POST[$key] ?? ''));
                 if (in_array($key, ['logo', 'catalogue_pdf'])) $this->validateAsset($value);
                 if (in_array($key, ['facebook', 'instagram', 'linkedin'])) $this->validateUrl($value);
-                if (in_array($key, ['email', 'smtp_from_email', 'alert_email']) && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) throw new RuntimeException('Enter a valid email address.');
+                if (in_array($key, ['email', 'smtp_from_email']) && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) throw new RuntimeException('Enter a valid email address.');
                 if (in_array($key, ['phone', 'address', 'whatsapp']) && !$value) throw new RuntimeException('Phone, address and WhatsApp are required.');
                 if (strlen($value) > 10000) throw new RuntimeException('Setting value is too long.');
                 Setting::save($key, $value);

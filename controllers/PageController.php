@@ -39,55 +39,20 @@ final class PageController
         $data['status']='new'; $data['email_sent']=0;
         $model=new ContentModel('enquiries'); $id=$model->save($data);
         try {
-            // Collect all configured destination recipients
-            $rawRecipients = [
-                setting('alert_email'),
-                setting('email'),
-                setting('smtp_user')
-            ];
-            try {
-                $adminEmails = Database::get()->query("SELECT email FROM admin_users WHERE email NOT LIKE '%@example.test' LIMIT 5")->fetchAll(PDO::FETCH_COLUMN);
-                if (!empty($adminEmails)) $rawRecipients = array_merge($rawRecipients, $adminEmails);
-            } catch (Throwable) {}
-
-            $destEmails = [];
-            foreach ($rawRecipients as $r) {
-                $r = trim((string)$r);
-                if ($r && filter_var($r, FILTER_VALIDATE_EMAIL)) {
-                    $destEmails[strtolower($r)] = $r;
-                }
-            }
-            if (empty($destEmails)) $destEmails['shreejigasteam@gmail.com'] = 'shreejigasteam@gmail.com';
-
+            $destEmail = setting('email') ?: 'shreejigasteam@gmail.com';
             $tpl = EmailTemplate::enquiry($data, $id);
-            $dispatchedCount = 0;
-
             if (SmtpMailer::isConfigured()) {
-                foreach ($destEmails as $destEmail) {
-                    try {
-                        SmtpMailer::send($destEmail, $tpl['subject'], $tpl['plain'], $tpl['html']);
-                        $dispatchedCount++;
-                    } catch (Throwable $sendErr) {
-                        $logDir = ROOT . '/storage/logs';
-                        if (!is_dir($logDir)) @mkdir($logDir, 0777, true);
-                        @file_put_contents($logDir . '/mail.log', '[' . date('Y-m-d H:i:s') . '] Failed delivery to ' . $destEmail . ': ' . $sendErr->getMessage() . "\n", FILE_APPEND);
-                    }
-                }
-                if ($dispatchedCount > 0) {
-                    $model->save(['email_sent' => 1], $id);
-                }
+                SmtpMailer::send($destEmail, $tpl['subject'], $tpl['plain'], $tpl['html']);
+                $model->save(['email_sent' => 1], $id);
             } elseif (MAIL_ENABLED) {
-                foreach ($destEmails as $destEmail) {
-                    $headers = [
-                        'MIME-Version' => '1.0',
-                        'Content-Type' => 'text/html; charset=UTF-8',
-                        'From' => mb_encode_mimeheader(setting('tagline') ?: SITE_NAME) . ' <' . $destEmail . '>'
-                    ];
-                    if ($data['email']) $headers['Reply-To'] = $data['email'];
-                    $sent = @mail($destEmail, $tpl['subject'], $tpl['html'], $headers);
-                    if ($sent) $dispatchedCount++;
-                }
-                if ($dispatchedCount > 0) $model->save(['email_sent' => 1], $id);
+                $headers = [
+                    'MIME-Version' => '1.0',
+                    'Content-Type' => 'text/html; charset=UTF-8',
+                    'From' => mb_encode_mimeheader(setting('tagline') ?: SITE_NAME) . ' <' . $destEmail . '>'
+                ];
+                if ($data['email']) $headers['Reply-To'] = $data['email'];
+                $sent = @mail($destEmail, $tpl['subject'], $tpl['html'], $headers);
+                if ($sent) $model->save(['email_sent' => 1], $id);
             }
         } catch (Throwable $e) {
             $logDir = ROOT . '/storage/logs';

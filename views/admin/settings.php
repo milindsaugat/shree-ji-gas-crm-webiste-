@@ -68,14 +68,8 @@ $user = Auth::user();
 
         <div class="admin-field">
           <label for="settingEmail">Official Public Email <span>*</span></label>
-          <input type="email" id="settingEmail" name="email" value="<?= e(setting('email')) ?>" required placeholder="info@shreejigas.com" autocomplete="email">
-          <small class="field-hint">Public inquiry address displayed on the website and legal documents.</small>
-        </div>
-
-        <div class="admin-field">
-          <label for="settingAlertEmail">Enquiry Notifications Recipient Email</label>
-          <input type="email" id="settingAlertEmail" name="alert_email" value="<?= e(setting('alert_email', setting('smtp_user'))) ?>" placeholder="your-email@example.com">
-          <small class="field-hint">New customer lead alerts from the website contact forms are dispatched directly to this inbox.</small>
+          <input type="email" id="settingEmail" name="email" value="<?= e(setting('email', 'shreejigasteam@gmail.com')) ?>" required placeholder="shreejigasteam@gmail.com" autocomplete="email">
+          <small class="field-hint">Public inquiry address displayed on the website and where customer enquiries are routed.</small>
         </div>
 
         <div class="admin-field">
