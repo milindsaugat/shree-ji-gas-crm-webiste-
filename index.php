@@ -11,8 +11,23 @@ session_start();
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('X-Frame-Options: SAMEORIGIN');
-spl_autoload_register(function (string $class): void { foreach (['config','helpers','models','controllers','controllers/Admin'] as $dir) { $file = ROOT . '/' . $dir . '/' . $class . '.php'; if (is_file($file)) { require $file; return; } } });
-require ROOT . '/helpers/functions.php';
+spl_autoload_register(function (string $class): void {
+    foreach (['config', 'helpers', 'models', 'controllers', 'controllers/Admin'] as $dir) {
+        $paths = [
+            ROOT . '/' . $dir . '/' . $class . '.php',
+            ROOT . '/' . $dir . '/' . lcfirst($class) . '.php',
+            ROOT . '/' . $dir . '/' . strtolower($class) . '.php'
+        ];
+        foreach ($paths as $file) {
+            if (is_file($file)) {
+                require $file;
+                return;
+            }
+        }
+    }
+});
+require_once ROOT . '/config/database.php';
+require_once ROOT . '/helpers/functions.php';
 
 if (isset($_GET['db_test'])) {
     header('Content-Type: text/plain; charset=utf-8');
