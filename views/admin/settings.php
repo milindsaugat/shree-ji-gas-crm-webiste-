@@ -41,6 +41,9 @@ $user = Auth::user();
     <button type="button" class="settings-tab-btn" role="tab" aria-selected="false" data-tab="tab-seo" id="tabBtnSeo">
       <?= icon('search-eye-line') ?> <span>Default SEO &amp; Social</span>
     </button>
+    <button type="button" class="settings-tab-btn" role="tab" aria-selected="false" data-tab="tab-tracking" id="tabBtnTracking">
+      <?= icon('code-box-line') ?> <span>Google &amp; Tracking Codes</span>
+    </button>
   </nav>
 </div>
 
@@ -328,7 +331,73 @@ $user = Auth::user();
     </div>
   </section>
 
-  <!-- Sticky Save Bar for Tabs 1, 2, 3, 5 -->
+  <!-- TAB 6: GOOGLE ANALYTICS, TAG MANAGER & TRACKING SCRIPTS -->
+  <section class="settings-tab-pane" id="tab-tracking" role="tabpanel" aria-labelledby="tabBtnTracking">
+    <div class="admin-panel settings-card">
+      <div class="settings-card__header">
+        <div class="settings-card__icon"><?= icon('code-box-line') ?></div>
+        <div>
+          <h2>Google Analytics, Tag Manager &amp; Custom Scripts</h2>
+          <p>Configure official Google Tag Manager container snippets (Head &amp; Body noscript), Google Analytics (GA4) IDs, and custom tracking codes into your public website pages.</p>
+        </div>
+      </div>
+
+      <!-- Quick IDs Section -->
+      <div class="settings-grid-2">
+        <div class="admin-field">
+          <label for="settingGaId"><?= icon('line-chart-line') ?> Google Analytics (GA4) Measurement ID</label>
+          <input type="text" id="settingGaId" name="google_analytics_id" value="<?= e(setting('google_analytics_id')) ?>" placeholder="e.g. G-XXXXXXXXXX or UA-XXXXXXXX-X">
+          <small class="field-hint">If provided, official Google gtag.js loader will automatically run inside the <code>&lt;head&gt;</code> of all public pages.</small>
+        </div>
+
+        <div class="admin-field">
+          <label for="settingGtmId"><?= icon('google-fill') ?> Google Tag Manager Container ID</label>
+          <input type="text" id="settingGtmId" name="gtm_container_id" value="<?= e(setting('gtm_container_id')) ?>" placeholder="e.g. GTM-XXXXXXX">
+          <small class="field-hint">If provided without custom code below, official GTM container head &amp; body snippets will load automatically.</small>
+        </div>
+      </div>
+
+      <div style="margin: 24px 0 20px; border-top: 1px solid var(--admin-border, #e2e8f0);"></div>
+
+      <!-- Custom Code Block 1: Head Code -->
+      <div class="admin-field admin-field--wide">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+          <label for="settingGtmHead" style="margin-bottom: 0; font-weight: 600;">
+            <?= icon('code-s-slash-line') ?> Google Tag Manager Head Code / Custom Header Scripts (Inside <code>&lt;head&gt;</code>)
+          </label>
+          <span style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-family: monospace;">Placed in &lt;head&gt;</span>
+        </div>
+        <textarea id="settingGtmHead" name="gtm_head" class="code-editor-textarea" rows="7" spellcheck="false" placeholder="<!-- Google Tag Manager -->&#10;&lt;script&gt;(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':&#10;new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],&#10;j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=&#10;'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);&#10;})(window,document,'script','dataLayer','GTM-XXXXXXX');&lt;/script&gt;&#10;<!-- End Google Tag Manager -->"><?= e(setting('gtm_head')) ?></textarea>
+        <small class="field-hint">Paste your complete Google Tag Manager <code>&lt;script&gt;</code> container snippet, Meta Pixel code, or Search Console verification tag here.</small>
+      </div>
+
+      <!-- Custom Code Block 2: Body Code -->
+      <div class="admin-field admin-field--wide" style="margin-top: 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+          <label for="settingGtmBody" style="margin-bottom: 0; font-weight: 600;">
+            <?= icon('file-code-line') ?> Google Tag Manager Body Code (Immediately after opening <code>&lt;body&gt;</code>)
+          </label>
+          <span style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-family: monospace;">Placed after &lt;body&gt;</span>
+        </div>
+        <textarea id="settingGtmBody" name="gtm_body" class="code-editor-textarea" rows="5" spellcheck="false" placeholder="<!-- Google Tag Manager (noscript) -->&#10;&lt;noscript&gt;&lt;iframe src=&quot;https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX&quot;&#10;height=&quot;0&quot; width=&quot;0&quot; style=&quot;display:none;visibility:hidden&quot;&gt;&lt;/iframe&gt;&lt;/noscript&gt;&#10;<!-- End Google Tag Manager (noscript) -->"><?= e(setting('gtm_body')) ?></textarea>
+        <small class="field-hint">Paste your Google Tag Manager <code>&lt;noscript&gt;</code> fallback container iframe here. Injected immediately below the opening <code>&lt;body&gt;</code> tag.</small>
+      </div>
+
+      <!-- Custom Code Block 3: Footer Scripts -->
+      <div class="admin-field admin-field--wide" style="margin-top: 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+          <label for="settingFooterScripts" style="margin-bottom: 0; font-weight: 600;">
+            <?= icon('terminal-box-line') ?> Custom Footer Scripts (Right before <code>&lt;/body&gt;</code>)
+          </label>
+          <span style="font-size: 11px; background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-family: monospace;">Placed before &lt;/body&gt;</span>
+        </div>
+        <textarea id="settingFooterScripts" name="footer_scripts" class="code-editor-textarea" rows="4" spellcheck="false" placeholder="<!-- Optional third-party chat widget, lead tracking or marketing scripts before &lt;/body&gt; -->"><?= e(setting('footer_scripts')) ?></textarea>
+        <small class="field-hint">Use this for third-party chat widgets, WhatsApp click triggers, or conversion trackers that load at the bottom of the page.</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sticky Save Bar for Tabs 1, 2, 3, 5, 6 -->
   <div class="sticky-save" id="settingsStickySave">
     <span>Site configuration and contact values update instantly across your entire website.</span>
     <button type="submit" class="btn btn-primary" id="btnSaveSiteSettings">
