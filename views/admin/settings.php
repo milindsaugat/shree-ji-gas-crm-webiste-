@@ -382,18 +382,6 @@ $user = Auth::user();
         <textarea id="settingGtmBody" name="gtm_body" class="code-editor-textarea" rows="5" spellcheck="false" placeholder="<!-- Google Tag Manager (noscript) -->&#10;&lt;noscript&gt;&lt;iframe src=&quot;https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX&quot;&#10;height=&quot;0&quot; width=&quot;0&quot; style=&quot;display:none;visibility:hidden&quot;&gt;&lt;/iframe&gt;&lt;/noscript&gt;&#10;<!-- End Google Tag Manager (noscript) -->"><?= e(setting('gtm_body')) ?></textarea>
         <small class="field-hint">Paste your Google Tag Manager <code>&lt;noscript&gt;</code> fallback container iframe here. Injected immediately below the opening <code>&lt;body&gt;</code> tag.</small>
       </div>
-
-      <!-- Custom Code Block 3: Footer Scripts -->
-      <div class="admin-field admin-field--wide" style="margin-top: 18px;">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
-          <label for="settingFooterScripts" style="margin-bottom: 0; font-weight: 600;">
-            <?= icon('terminal-box-line') ?> Custom Footer Scripts (Right before <code>&lt;/body&gt;</code>)
-          </label>
-          <span style="font-size: 11px; background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-family: monospace;">Placed before &lt;/body&gt;</span>
-        </div>
-        <textarea id="settingFooterScripts" name="footer_scripts" class="code-editor-textarea" rows="4" spellcheck="false" placeholder="<!-- Optional third-party chat widget, lead tracking or marketing scripts before &lt;/body&gt; -->"><?= e(setting('footer_scripts')) ?></textarea>
-        <small class="field-hint">Use this for third-party chat widgets, WhatsApp click triggers, or conversion trackers that load at the bottom of the page.</small>
-      </div>
     </div>
   </section>
 

@@ -843,7 +843,7 @@ final class AdminController
             'smtp_enabled', 'smtp_host', 'smtp_port', 'smtp_encryption', 'smtp_user', 'smtp_pass', 'smtp_from_email', 'smtp_from_name',
             'meta_title', 'meta_description', 'focus_keywords',
             'facebook', 'instagram', 'linkedin',
-            'google_analytics_id', 'gtm_container_id', 'gtm_head', 'gtm_body', 'footer_scripts'
+            'google_analytics_id', 'gtm_container_id', 'gtm_head', 'gtm_body'
         ];
         $error = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') try {
@@ -857,7 +857,7 @@ final class AdminController
                 if (in_array($key, ['facebook', 'instagram', 'linkedin'])) $this->validateUrl($value);
                 if (in_array($key, ['email', 'smtp_from_email']) && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) throw new RuntimeException('Enter a valid email address.');
                 if (in_array($key, ['phone', 'address', 'whatsapp']) && !$value) throw new RuntimeException('Phone, address and WhatsApp are required.');
-                if (in_array($key, ['gtm_head', 'gtm_body', 'footer_scripts'])) {
+                if (in_array($key, ['gtm_head', 'gtm_body'])) {
                     if (strlen($value) > 65000) throw new RuntimeException('Tracking script is too long.');
                 } else {
                     if (strlen($value) > 10000) throw new RuntimeException('Setting value is too long.');

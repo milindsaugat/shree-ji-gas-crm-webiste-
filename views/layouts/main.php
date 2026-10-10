@@ -33,6 +33,5 @@
     <?php require ROOT.'/views/partials/footer.php'; ?>
     <a class="whatsapp-float" href="https://wa.me/<?= e(preg_replace('/\D/','',setting('whatsapp'))) ?>" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp"><?= icon('whatsapp-line') ?><span>Let’s talk</span></a>
     <div class="modal fade" id="enquiryModal" tabindex="-1" aria-labelledby="enquiryTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content"><div class="modal-header"><div><span class="eyebrow">WE’RE HERE TO HELP</span><h2 id="enquiryTitle">Tell us what you need.</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><?php $formId='modal'; require ROOT.'/views/partials/enquiry-form.php'; ?></div></div></div>
-    <?php require ROOT.'/views/partials/tracking-footer.php'; ?>
 </body>
 </html>
