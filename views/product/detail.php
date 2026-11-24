@@ -15,19 +15,11 @@
     <section class="product-detail container">
         <!-- Left: Equipment Inspection Gallery -->
         <div class="product-gallery">
-            <div class="product-gallery__main-wrap visual-image-container" data-field="thumbnail">
+            <div class="product-gallery__main-wrap">
                 <a href="<?= photo($product['thumbnail']) ?>" class="glightbox main-product-image" id="mainProductLink" data-gallery="product" aria-label="Enlarge technical photo of <?= e($product['name']) ?>">
-                    <img id="mainProductImage" data-preview="thumbnail" src="<?= photo($product['thumbnail']) ?>" alt="<?= e($product['image_alt'] ?: $product['name']) ?>" width="800" height="600" fetchpriority="high">
+                    <img id="mainProductImage" src="<?= photo($product['thumbnail']) ?>" alt="<?= e($product['image_alt'] ?: $product['name']) ?>" width="800" height="600" fetchpriority="high">
                     <span class="product-gallery__zoom"><?= icon('zoom-in-line') ?> Inspect high-resolution</span>
                 </a>
-                <div class="visual-image-overlay">
-                    <div class="visual-image-prompt">
-                        <span><?= icon('image-edit-line') ?> Drag &amp; drop to replace photo</span>
-                        <div class="visual-img-btn-row">
-                            <button type="button" class="btn-img-action" onclick="parent.postMessage({type:'visual-open-media-picker'},'*')">Choose Library</button>
-                        </div>
-                    </div>
-                </div>
             </div>
             
             <?php 
